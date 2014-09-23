@@ -1,0 +1,7 @@
+.htaccess
+Config/core.php
+Config/database.php
+tmp/*
+webroot/.htaccess
+
+nbproject
