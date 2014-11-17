@@ -8,9 +8,61 @@ class BulletinShell extends AppShell {
 
     public $uses = array();
     public $links = array();
+    public $currentUrlBase = '';
     public $titlePrefix = '';
+    public $s;
 
     public function main() {
+        $this->b2014();
+    }
+
+    public function b2014() {
+        $this->s = new HttpSocket();
+        $cachePath = TMP . '103';
+        if (!file_exists($cachePath)) {
+            mkdir($cachePath);
+        }
+        $baseUrl = 'http://103bulletin.cec.gov.tw/103/';
+        $this->currentUrlBase = $baseUrl;
+        $baseCache = $cachePath . '/' . md5($baseUrl);
+        if (!file_exists($baseCache)) {
+            file_put_contents($baseCache, file_get_contents($baseUrl));
+        }
+        $baseContent = file_get_contents($baseCache);
+        $this->treeLinks($baseContent, '', $baseUrl);
+        $csvPath = __DIR__ . '/data';
+        $pdfPath = $csvPath . '/pdf_103';
+        if (!file_exists($pdfPath)) {
+            mkdir($pdfPath, 0777, true);
+        }
+        $uuidStack = array();
+        $csvFh = fopen($csvPath . '/bulletin_103.csv', 'r+');
+        while ($line = fgetcsv($csvFh, 2048)) {
+            $uuidStack[$line[1]] = $line[2];
+        }
+        rewind($csvFh);
+        foreach ($this->links AS $url => $link) {
+            if ($link['isPdf'] === true) {
+                if (isset($uuidStack[$url])) {
+                    $uuid = $uuidStack[$url];
+                } else {
+                    $uuid = String::uuid();
+                }
+                $pdfFile = "{$pdfPath}/{$uuid}.pdf";
+                if (!file_exists($pdfFile)) {
+                    copy(TMP . '103/' . md5($url), $pdfFile);
+                }
+                fputcsv($csvFh, array(
+                    $link['title'],
+                    $url,
+                    $uuid,
+                ));
+            }
+        }
+        fclose($csvFh);
+    }
+
+    public function orig() {
         $cachePath = TMP . 'cq';
         if (!file_exists($cachePath)) {
             mkdir($cachePath);
@@ -233,6 +285,51 @@ class BulletinShell extends AppShell {
             }
         }
         return $cities;
+    }
+
+    public function treeLinks($c, $titlePrefix = '', $urlPrefix = '') {
+        $linksFound = array();
+        $key = '<a href=';
+        $pos = strpos($c, $key);
+        while (false !== $pos) {
+            $pos = strpos($c, '=', $pos) + 1;
+            $posEnd = strpos($c, '</a>', $pos);
+            $part = explode('>', substr($c, $pos, $posEnd - $pos));
+            $part[0] = str_replace(array('\'', '"', ' '), array(''), $part[0]);
+            $url = $urlPrefix . $part[0];
+            $slashPos = strrpos($url, '/') + 1;
+            $finalPart = urlencode(substr($url, $slashPos));
+            $isPdf = true;
+            if (substr(strtolower($finalPart), -3) !== 'pdf') {
+                $finalPart .= '/';
+                $isPdf = false;
+            }
+            $url = substr($url, 0, $slashPos) . $finalPart;
+            if (!isset($this->links[$url])) {
+                $title = $part[1];
+                $this->links[$url] = array(
+                    'title' => $titlePrefix . $title,
+                    'isPdf' => $isPdf,
+                );
+                $linksFound[] = array(
+                    'url' => $url,
+                    'title' => $titlePrefix . $title,
+                );
+            }
+            $pos = strpos($c, $key, $posEnd);
+        }
+        if (!empty($linksFound)) {
+            foreach ($linksFound AS $link) {
+                $cCache = TMP . '103/' . md5($link['url']);
+                if (!file_exists($cCache)) {
+                    $cap = urldecode($link['url']);
+                    echo "downloading {$cap}\n";
+                    file_put_contents($cCache, $this->s->get($link['url']));
+                }
+                $cContent = file_get_contents($cCache);
+                $this->treeLinks($cContent, "{$link['title']} > ", $link['url']);
+            }
+        }
     }
 
 }
