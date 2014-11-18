@@ -298,6 +298,57 @@ class BulletinShell extends AppShell {
             $posEnd = strpos($c, '</a>', $pos);
             $part = explode('>', substr($c, $pos, $posEnd - $pos));
             $part[0] = str_replace(array('\'', '"', ' '), array(''), $part[0]);
+            if (false !== strpos($part[0], '?')) {
+                switch ($part[0]) {
+                    case '員林鎮大?里里長.pdf':
+                        $part[0] = '員林鎮大峯里里長.pdf';
+                        $part[1] = '員林鎮大峯里里長';
+                        break;
+                    case '埔心鄉南?村村長.pdf':
+                        $part[0] = '埔心鄉南舘村村長.pdf';
+                        $part[1] = '埔心鄉南舘村村長';
+                        break;
+                    case '埔心鄉埤?村村長.pdf':
+                        $part[0] = '埔心鄉埤脚村村長.pdf';
+                        $part[1] = '埔心鄉埤脚村村長';
+                        break;
+                    case '埔心鄉新?村村長.pdf':
+                        $part[0] = '埔心鄉新舘村村長.pdf';
+                        $part[1] = '埔心鄉新舘村村長';
+                        break;
+                    case '埔心鄉舊?村村長.pdf':
+                        $part[0] = '埔心鄉舊舘村村長.pdf';
+                        $part[1] = '埔心鄉舊舘村村長';
+                        break;
+                    case '埔鹽鄉?子村村長.pdf':
+                        $part[0] = '埔鹽鄉廍子村村長.pdf';
+                        $part[1] = '埔鹽鄉廍子村村長';
+                        break;
+                    case '埔鹽鄉瓦?村村長.pdf':
+                        $part[0] = '埔鹽鄉瓦磘村村長.pdf';
+                        $part[1] = '埔鹽鄉瓦磘村村長';
+                        break;
+                    case '彰化市下?里里長.pdf':
+                        $part[0] = '彰化市下廍里里長.pdf';
+                        $part[1] = '彰化市下廍里里長';
+                        break;
+                    case '彰化市寶?里里長.pdf':
+                        $part[0] = '彰化市寶廍里里長.pdf';
+                        $part[1] = '彰化市寶廍里里長';
+                        break;
+                    case '彰化市磚?里里長.pdf':
+                        $part[0] = '彰化市磚磘里里長.pdf';
+                        $part[1] = '彰化市磚磘里里長';
+                        break;
+                    case '芳苑鄉頂?村村長.pdf':
+                        $part[0] = '芳苑鄉頂廍村村長.pdf';
+                        $part[1] = '芳苑鄉頂廍村村長';
+                        break;
+                    default:
+                        echo "{$part[0]}\n\n";
+                        exit();
+                }
+            }
             $url = $urlPrefix . $part[0];
             $slashPos = strrpos($url, '/') + 1;
             $finalPart = urlencode(substr($url, $slashPos));
