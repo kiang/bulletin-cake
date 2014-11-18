@@ -57,6 +57,8 @@ class BulletinShell extends AppShell {
                     $url,
                     $uuid,
                 ));
+            } else {
+                unlink(TMP . '103/' . md5($url));
             }
         }
         fclose($csvFh);
