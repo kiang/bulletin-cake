@@ -36,11 +36,15 @@ class BulletinShell extends AppShell {
             mkdir($pdfPath, 0777, true);
         }
         $uuidStack = array();
-        $csvFh = fopen($csvPath . '/bulletin_103.csv', 'r+');
-        while ($line = fgetcsv($csvFh, 2048)) {
-            $uuidStack[$line[1]] = $line[2];
+        $csvFile = $csvPath . '/bulletin_103.csv';
+        if (file_exists($csvFile)) {
+            $csvFh = fopen($csvFile, 'r');
+            while ($line = fgetcsv($csvFh, 2048)) {
+                $uuidStack[$line[1]] = $line[2];
+            }
+            fclose($csvFh);
         }
-        rewind($csvFh);
+        $csvFh = fopen($csvFile, 'w');
         foreach ($this->links AS $url => $link) {
             if ($link['isPdf'] === true) {
                 if (isset($uuidStack[$url])) {
@@ -297,7 +301,7 @@ class BulletinShell extends AppShell {
             $pos = strpos($c, '=', $pos) + 1;
             $posEnd = strpos($c, '</a>', $pos);
             $part = explode('>', substr($c, $pos, $posEnd - $pos));
-            $part[0] = str_replace(array('\'', '"', ' '), array(''), $part[0]);
+            $part[0] = str_replace(array('\'', '"'), array('', ''), $part[0]);
             if (false !== strpos($part[0], '?')) {
                 switch ($part[0]) {
                     case '員林鎮大?里里長.pdf':
@@ -359,7 +363,7 @@ class BulletinShell extends AppShell {
             }
             $url = $urlPrefix . $part[0];
             $slashPos = strrpos($url, '/') + 1;
-            $finalPart = urlencode(substr($url, $slashPos));
+            $finalPart = rawurlencode(substr($url, $slashPos));
             $isPdf = true;
             if (substr(strtolower($finalPart), -3) !== 'pdf') {
                 $finalPart .= '/';
