@@ -344,6 +344,10 @@ class BulletinShell extends AppShell {
                         $part[0] = '芳苑鄉頂廍村村長.pdf';
                         $part[1] = '芳苑鄉頂廍村村長';
                         break;
+                    case '萬華區糖?里里長.PDF':
+                        $part[0] = '萬華區糖廍里里長.PDF';
+                        $part[1] = '萬華區糖廍里里長';
+                        break;
                     default:
                         echo "{$part[0]}\n\n";
                         exit();
