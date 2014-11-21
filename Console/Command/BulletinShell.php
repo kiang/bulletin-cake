@@ -299,7 +299,7 @@ class BulletinShell extends AppShell {
         $pos = strpos($c, $key);
         while (false !== $pos) {
             $pos = strpos($c, '=', $pos) + 1;
-            $posEnd = strpos($c, '</a>', $pos);
+            $posEnd = strpos($c, '</a', $pos);
             $part = explode('>', substr($c, $pos, $posEnd - $pos));
             $part[0] = str_replace(array('\'', '"'), array('', ''), $part[0]);
             if (false !== strpos($part[0], '?')) {
@@ -384,21 +384,83 @@ class BulletinShell extends AppShell {
                         $part[0] = '西區双龍里里長.pdf';
                         $part[1] = '西區双龍里里長';
                         break;
+                    case '中埔鄉中埔村、??村、裕民村、灣潭村、隆興村、義仁村、社口村長.pdf':
+                        $part[0] = '中埔鄉中埔村、塩舘村、裕民村、灣潭村、隆興村、義仁村、社口村長.pdf';
+                        $part[1] = '中埔鄉中埔村、塩舘村、裕民村、灣潭村、隆興村、義仁村、社口村長';
+                        break;
+                    case '中埔鄉龍門村、石?村、東興村、中崙村、頂埔村、同仁村、瑞豐村、深坑村、三層村、沄水村長.pdf':
+                        $part[0] = '中埔鄉龍門村、石硦村、東興村、中崙村、頂埔村、同仁村、瑞豐村、深坑村、三層村、沄水村長.pdf';
+                        $part[1] = '中埔鄉龍門村、石硦村、東興村、中崙村、頂埔村、同仁村、瑞豐村、深坑村、三層村、沄水村長';
+                        break;
+                    case '朴子市?溪里、溪口里、德興里、仁和里、大鄉里、大葛里、佳禾里、新寮里長.pdf':
+                        $part[0] = '朴子市双溪里、溪口里、德興里、仁和里、大鄉里、大葛里、佳禾里、新寮里長.pdf';
+                        $part[1] = '朴子市双溪里、溪口里、德興里、仁和里、大鄉里、大葛里、佳禾里、新寮里長';
+                        break;
+                    case '民雄鄉豊收村、三興村、東興村、鎮北村、北斗村、?福村、大崎村、秀林村、松山村、福樂村長.pdf':
+                        $part[0] = '民雄鄉豊收村、三興村、東興村、鎮北村、北斗村、双福村、大崎村、秀林村、松山村、福樂村長.pdf';
+                        $part[1] = '民雄鄉豊收村、三興村、東興村、鎮北村、北斗村、双福村、大崎村、秀林村、松山村、福樂村長';
+                        break;
+                    case '水上鄉水上村、水頭村、粗溪村、下?村、三和村、回歸村長.pdf':
+                        $part[0] = '水上鄉水上村、水頭村、粗溪村、下寮村、三和村、回歸村長.pdf';
+                        $part[1] = '水上鄉水上村、水頭村、粗溪村、下寮村、三和村、回歸村長';
+                        break;
+                    case '溪口鄉溪東村、溪西村、溪北村、?溝村、疊溪村、妙崙村、坪頂村長.pdf':
+                        $part[0] = '溪口鄉溪東村、溪西村、溪北村、柳溝村、疊溪村、妙崙村、坪頂村長.pdf';
+                        $part[1] = '溪口鄉溪東村、溪西村、溪北村、柳溝村、疊溪村、妙崙村、坪頂村長';
+                        break;
+                    case '左營區北?里里長.pdf':
+                        $part[0] = '左營區北廍里里長.pdf';
+                        $part[1] = '左營區北廍里里長';
+                        break;
+                    case '左營區南?里里長.pdf':
+                        $part[0] = '左營區南廍里里長.pdf';
+                        $part[1] = '左營區南廍里里長';
+                        break;
+                    case '三峽區三峽、秀川、八張、中埔、弘道、永?、鳶山、龍埔、龍恩、龍學、礁溪、安溪、介壽、中正里里長.pdf':
+                        $part[0] = '三峽區三峽、秀川、八張、中埔、弘道、永舘、鳶山、龍埔、龍恩、龍學、礁溪、安溪、介壽、中正里里長.pdf';
+                        $part[1] = '三峽區三峽、秀川、八張、中埔、弘道、永舘、鳶山、龍埔、龍恩、龍學、礁溪、安溪、介壽、中正里里長';
+                        break;
+                    case '中和區景安、景文、錦和、錦昌、灰?、積穗、民享、員山、嘉穗、文元里里長.pdf':
+                        $part[0] = '中和區景安、景文、錦和、錦昌、灰磘、積穗、民享、員山、嘉穗、文元里里長.pdf';
+                        $part[1] = '中和區景安、景文、錦和、錦昌、灰磘、積穗、民享、員山、嘉穗、文元里里長';
+                        break;
+                    case '中和區福美、福祥、瓦?、信和、佳和、新南、南山、平河、福和里里長.pdf':
+                        $part[0] = '中和區福美、福祥、瓦磘、信和、佳和、新南、南山、平河、福和里里長.pdf';
+                        $part[1] = '中和區福美、福祥、瓦磘、信和、佳和、新南、南山、平河、福和里里長';
+                        break;
+                    case '梅山鄉?溪村、大南村、安靖村、永興村、半天村.pdf':
+                        $part[0] = '梅山鄉双溪村、大南村、安靖村、永興村、半天村.pdf';
+                        $part[1] = '梅山鄉双溪村、大南村、安靖村、永興村、半天村';
+                        break;
+                    case '梅山鄉太平村、太興村、龍眼村、碧湖村、瑞?村、瑞里村、太和村.pdf':
+                        $part[0] = '梅山鄉太平村、太興村、龍眼村、碧湖村、瑞峯村、瑞里村、太和村.pdf';
+                        $part[1] = '梅山鄉太平村、太興村、龍眼村、碧湖村、瑞峯村、瑞里村、太和村';
+                        break;
+                    case '竹崎鄉龍山村、文?村、金獅村、復金村、緞繻村、仁壽村、中和村、光華村.pdf':
+                        $part[0] = '竹崎鄉龍山村、文峯村、金獅村、復金村、緞繻村、仁壽村、中和村、光華村.pdf';
+                        $part[1] = '竹崎鄉龍山村、文峯村、金獅村、復金村、緞繻村、仁壽村、中和村、光華村';
+                        break;
                     default:
                         echo "{$part[0]}\n\n";
                         exit();
+                        $part[0] = '';
+                        $part[1] = '';
                 }
             }
             $url = $urlPrefix . $part[0];
             $slashPos = strrpos($url, '/') + 1;
             $finalPart = rawurlencode(substr($url, $slashPos));
             $isPdf = true;
-            if (substr(strtolower($finalPart), -3) !== 'pdf') {
+            $ext = substr(strtolower($finalPart), -3);
+            if ($ext !== 'pdf') {
+                if ($ext === 'mp3') {
+                    continue;
+                }
                 $finalPart .= '/';
                 $isPdf = false;
             }
             $url = substr($url, 0, $slashPos) . $finalPart;
-            if (!isset($this->links[$url])) {
+            if (!isset($this->links[$url]) && isset($part[1])) {
                 $title = $part[1];
                 $this->links[$url] = array(
                     'title' => $titlePrefix . $title,
