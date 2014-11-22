@@ -7,7 +7,7 @@ class ExtractShell extends AppShell {
     public $uses = array();
 
     public function main() {
-        $this->pdf();
+        //$this->pdf();
         $this->pdf103();
     }
 

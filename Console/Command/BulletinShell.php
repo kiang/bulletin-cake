@@ -440,6 +440,10 @@ class BulletinShell extends AppShell {
                         $part[0] = '竹崎鄉龍山村、文峯村、金獅村、復金村、緞繻村、仁壽村、中和村、光華村.pdf';
                         $part[1] = '竹崎鄉龍山村、文峯村、金獅村、復金村、緞繻村、仁壽村、中和村、光華村';
                         break;
+                    case '板橋區港德、民權、民安、漢生、公?、新民里里長.pdf':
+                        $part[0] = '板橋區港德、民權、民安、漢生、公舘、新民里里長.pdf';
+                        $part[1] = '板橋區港德、民權、民安、漢生、公舘、新民里里長';
+                        break;
                     default:
                         echo "{$part[0]}\n\n";
                         exit();
