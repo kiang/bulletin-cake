@@ -302,6 +302,13 @@ class BulletinShell extends AppShell {
             $posEnd = strpos($c, '</a', $pos);
             $part = explode('>', substr($c, $pos, $posEnd - $pos));
             $part[0] = str_replace(array('\'', '"'), array('', ''), $part[0]);
+            $isPdf = true;
+            $ext = substr(strtolower($part[0]), -3);
+            if ($ext === 'mp3' || (false !== strpos($titlePrefix . $part[1], '有聲'))) {
+                $pos = strpos($c, $key, $posEnd);
+                continue;
+            }
+
             if (false !== strpos($part[0], '?')) {
                 switch ($part[0]) {
                     case '員林鎮大?里里長.pdf':
@@ -454,12 +461,7 @@ class BulletinShell extends AppShell {
             $url = $urlPrefix . $part[0];
             $slashPos = strrpos($url, '/') + 1;
             $finalPart = rawurlencode(substr($url, $slashPos));
-            $isPdf = true;
-            $ext = substr(strtolower($finalPart), -3);
             if ($ext !== 'pdf') {
-                if ($ext === 'mp3') {
-                    continue;
-                }
                 $finalPart .= '/';
                 $isPdf = false;
             }
