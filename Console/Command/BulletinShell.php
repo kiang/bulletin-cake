@@ -13,7 +13,7 @@ class BulletinShell extends AppShell {
     public $s;
 
     public function main() {
-        $this->b2014_counties();
+        $this->b2014();
     }
 
     /*
@@ -522,6 +522,10 @@ class BulletinShell extends AppShell {
                     case '板橋區港德、民權、民安、漢生、公?、新民里里長.pdf':
                         $part[0] = '板橋區港德、民權、民安、漢生、公舘、新民里里長.pdf';
                         $part[1] = '板橋區港德、民權、民安、漢生、公舘、新民里里長';
+                        break;
+                    case '鳥松區?埔里.pdf':
+                        $part[0] = '鳥松區坔埔里.pdf';
+                        $part[1] = '鳥松區坔埔里';
                         break;
                     default:
                         echo "{$part[0]}\n\n";
