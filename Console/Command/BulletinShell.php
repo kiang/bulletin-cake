@@ -33,6 +33,9 @@ class BulletinShell extends AppShell {
             'http://www.ptec.gov.tw/files/15-1014-25302,c5807-1.php',
             'http://www.ptec.gov.tw/files/15-1014-25303,c5807-1.php',
             'http://www.ptec.gov.tw/files/15-1014-25304,c5807-1.php',
+            'http://www.chec.gov.tw/files/11-1011-4569-1.php',
+            'http://www.mect.gov.tw/files/15-1001-25397,c4720-1.php',
+            'http://www.ptec.gov.tw/files/15-1014-25284,c5806-1.php',
         );
         $this->s = new HttpSocket();
         $cachePath = TMP . '103';
@@ -64,7 +67,10 @@ class BulletinShell extends AppShell {
                 $posEnd = strpos($page, '</a>', $pos);
                 $parts = substr($page, $pos, $posEnd - $pos);
                 if (false !== strpos(strtolower($parts), 'pdf')) {
-                    $link = $baseUrl . substr($parts, 0, strpos($parts, '"'));
+                    $link = substr($parts, 0, strpos($parts, '"'));
+                    if (false === strpos($link, $baseUrl)) {
+                        $link = $baseUrl . $link;
+                    }
                     $title = substr($parts, strpos($parts, '>') + 1);
                     if (isset($uuidStack[$link])) {
                         $uuid = $uuidStack[$link];
