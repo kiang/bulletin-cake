@@ -13,7 +13,20 @@ class BulletinShell extends AppShell {
     public $s;
 
     public function main() {
-        $this->b2014();
+        $this->b2014_counties();
+    }
+    
+    /*
+     * As some counties didn't upload bulletins to cec, try to get them from each
+     * website.
+     */
+    public function b2014_counties() {
+        $targets = array(
+            'http://www.lcec.gov.tw/files/11-1022-5167.php',
+            'http://www.cycec.gov.tw/files/15-1013-25483,c4743-1.php',
+            'http://www.cycec.gov.tw/files/15-1013-25487,c4743-1.php',
+            'http://www.cycec.gov.tw/files/15-1013-25457,c4742-1.php',
+        );
     }
 
     public function b2014() {
