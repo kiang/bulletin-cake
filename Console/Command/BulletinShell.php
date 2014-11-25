@@ -15,18 +15,77 @@ class BulletinShell extends AppShell {
     public function main() {
         $this->b2014_counties();
     }
-    
+
     /*
      * As some counties didn't upload bulletins to cec, try to get them from each
      * website.
      */
+
     public function b2014_counties() {
         $targets = array(
             'http://www.lcec.gov.tw/files/11-1022-5167.php',
             'http://www.cycec.gov.tw/files/15-1013-25483,c4743-1.php',
             'http://www.cycec.gov.tw/files/15-1013-25487,c4743-1.php',
             'http://www.cycec.gov.tw/files/15-1013-25457,c4742-1.php',
+            'http://www.ptec.gov.tw/files/15-1014-25289,c5807-1.php',
+            'http://www.ptec.gov.tw/files/15-1014-25290,c5807-1.php',
+            'http://www.ptec.gov.tw/files/15-1014-25291,c5807-1.php',
+            'http://www.ptec.gov.tw/files/15-1014-25302,c5807-1.php',
+            'http://www.ptec.gov.tw/files/15-1014-25303,c5807-1.php',
+            'http://www.ptec.gov.tw/files/15-1014-25304,c5807-1.php',
         );
+        $this->s = new HttpSocket();
+        $cachePath = TMP . '103';
+        if (!file_exists($cachePath)) {
+            mkdir($cachePath);
+        }
+        $csvPath = __DIR__ . '/data';
+        $pdfPath = $csvPath . '/pdf_103';
+        $uuidStack = array();
+        $csvFile = $csvPath . '/bulletin_103_counties.csv';
+        if (file_exists($csvFile)) {
+            $csvFh = fopen($csvFile, 'r');
+            while ($line = fgetcsv($csvFh, 2048)) {
+                $uuidStack[$line[1]] = $line[2];
+            }
+            fclose($csvFh);
+        }
+        $csvFh = fopen($csvFile, 'w');
+        foreach ($targets AS $target) {
+            $cache = $cachePath . '/' . md5($target);
+            if (!file_exists($cache)) {
+                file_put_contents($cache, file_get_contents($target));
+            }
+            $page = file_get_contents($cache);
+            $baseUrl = substr($target, 0, strpos($target, '/file'));
+            $pos = strpos($page, 'a href=');
+            while (false !== $pos) {
+                $pos = strpos($page, '"', $pos) + 1;
+                $posEnd = strpos($page, '</a>', $pos);
+                $parts = substr($page, $pos, $posEnd - $pos);
+                if (false !== strpos(strtolower($parts), 'pdf')) {
+                    $link = $baseUrl . substr($parts, 0, strpos($parts, '"'));
+                    $title = substr($parts, strpos($parts, '>') + 1);
+                    if (isset($uuidStack[$link])) {
+                        $uuid = $uuidStack[$link];
+                    } else {
+                        $uuid = String::uuid();
+                    }
+                    $pdfFile = "{$pdfPath}/{$uuid}.pdf";
+                    if (!file_exists($pdfFile)) {
+                        file_put_contents($pdfFile, file_get_contents($link));
+                    }
+                    fputcsv($csvFh, array(
+                        $title,
+                        $link,
+                        $uuid,
+                    ));
+                }
+
+                $pos = strpos($page, 'a href=', $posEnd);
+            }
+        }
+        fclose($csvFh);
     }
 
     public function b2014() {
