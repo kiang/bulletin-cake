@@ -13,7 +13,60 @@ class BulletinShell extends AppShell {
     public $s;
 
     public function main() {
-        $this->b2014();
+        $this->b2014_ptec();
+    }
+
+    public function b2014_ptec() {
+        $targets = array(
+            'http://www.ptec.gov.tw/files/11-1014-5809-1.php',
+            'http://www.ptec.gov.tw/files/11-1014-5808.php',
+        );
+        $cachePath = TMP . '103';
+        if (!file_exists($cachePath)) {
+            mkdir($cachePath);
+        }
+        $csvPath = __DIR__ . '/data';
+        $pdfPath = $csvPath . '/pdf_103';
+        $uuidStack = array();
+        $csvFile = $csvPath . '/bulletin_103_ptec.csv';
+        if (file_exists($csvFile)) {
+            $csvFh = fopen($csvFile, 'r');
+            while ($line = fgetcsv($csvFh, 2048)) {
+                $uuidStack[$line[1]] = $line[2];
+            }
+            fclose($csvFh);
+        }
+        foreach ($targets AS $target) {
+            $cache = $cachePath . '/' . md5($target);
+            if (!file_exists($cache)) {
+                file_put_contents($cache, file_get_contents($target));
+            }
+            $page = file_get_contents($cache);
+            $this->dyn22Tree($page);
+        }
+        $csvFh = fopen($csvFile, 'w');
+        foreach ($this->links AS $url => $link) {
+            if ($link['isPdf'] === true) {
+                if (substr($link['title'], -4) === '.pdf') {
+                    $link['title'] = substr($link['title'], 0, -4);
+                }
+                if (isset($uuidStack[$url])) {
+                    $uuid = $uuidStack[$url];
+                } else {
+                    $uuid = String::uuid();
+                }
+                $pdfFile = "{$pdfPath}/{$uuid}.pdf";
+                if (!file_exists($pdfFile)) {
+                    copy(TMP . '103/' . md5($url), $pdfFile);
+                }
+                fputcsv($csvFh, array(
+                    $link['title'],
+                    $url,
+                    $uuid,
+                ));
+            }
+        }
+        fclose($csvFh);
     }
 
     /*
@@ -571,6 +624,66 @@ class BulletinShell extends AppShell {
                 }
                 $cContent = file_get_contents($cCache);
                 $this->treeLinks($cContent, "{$link['title']} > ", $link['url']);
+            }
+        }
+    }
+
+    public function dyn22Tree($c, $titlePrefix = '') {
+        $linksFound = array();
+        $pos = strpos($c, '<div id="Dyn_2_2"');
+        if (false === $c) {
+            die('??');
+        }
+        $posEnd = strpos($c, '<div id="Dyn_2_3"');
+        $c = substr($c, $pos, $posEnd - $pos);
+        $key = '<a href=';
+        $pos = strpos($c, $key);
+        while (false !== $pos) {
+            $pos = strpos($c, '=', $pos) + 1;
+            $posEnd = strpos($c, '</a', $pos);
+            $part = explode('>', substr($c, $pos, $posEnd - $pos));
+            $part[0] = str_replace(array('\'', '"'), array('', ''), $part[0]);
+            $spacePos = strpos($part[0], ' ');
+            if (false !== $spacePos) {
+                $part[0] = substr($part[0], 0, strpos($part[0], ' '));
+            }
+
+            $isPdf = true;
+            $ext = substr(strtolower($part[0]), -3);
+            if (false === strpos($part[0], 'http')) {
+                $url = 'http://www.ptec.gov.tw' . $part[0];
+            } else {
+                $url = $part[0];
+            }
+
+            if ($ext !== 'pdf') {
+                $isPdf = false;
+            }
+            if (!isset($this->links[$url]) && isset($part[1])) {
+                if (false === strpos($part[1], '附件') && false === strpos($url, 'downloadfile.php')) {
+                    $title = $part[1];
+                    $this->links[$url] = array(
+                        'title' => $titlePrefix . $title,
+                        'isPdf' => $isPdf,
+                    );
+                    $linksFound[] = array(
+                        'url' => $url,
+                        'title' => $titlePrefix . $title,
+                    );
+                }
+            }
+            $pos = strpos($c, $key, $posEnd);
+        }
+        if (!empty($linksFound)) {
+            foreach ($linksFound AS $link) {
+                $cCache = TMP . '103/' . md5($link['url']);
+                if (!file_exists($cCache)) {
+                    $cap = urldecode($link['url']);
+                    echo "downloading {$cap}\n";
+                    file_put_contents($cCache, file_get_contents($link['url']));
+                }
+                $cContent = file_get_contents($cCache);
+                $this->dyn22Tree($cContent, "{$link['title']} > ");
             }
         }
     }

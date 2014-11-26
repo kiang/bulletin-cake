@@ -101,7 +101,7 @@ class ExtractShell extends AppShell {
         $csvPath = __DIR__ . '/data';
         $pdfPath = $csvPath . '/pdf_103';
         $resultPath = $csvPath . '/txt_103';
-        //$csvFh = fopen($csvPath . '/bulletin_103_counties.csv', 'r');
+        //$csvFh = fopen($csvPath . '/bulletin_103_ptec.csv', 'r');
         $csvFh = fopen($csvPath . '/bulletin_103.csv', 'r');
         $htmlPath = TMP . 'txt_103';
         if (!file_exists($htmlPath)) {
