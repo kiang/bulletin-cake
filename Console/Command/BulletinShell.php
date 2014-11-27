@@ -8,12 +8,13 @@ class BulletinShell extends AppShell {
 
     public $uses = array();
     public $links = array();
+    public $uuidStack = array();
     public $currentUrlBase = '';
     public $titlePrefix = '';
     public $s;
 
     public function main() {
-        $this->b2014_ptec();
+        $this->b2014();
     }
 
     public function b2014_ptec() {
@@ -27,12 +28,12 @@ class BulletinShell extends AppShell {
         }
         $csvPath = __DIR__ . '/data';
         $pdfPath = $csvPath . '/pdf_103';
-        $uuidStack = array();
+        $this->uuidStack = array();
         $csvFile = $csvPath . '/bulletin_103_ptec.csv';
         if (file_exists($csvFile)) {
             $csvFh = fopen($csvFile, 'r');
             while ($line = fgetcsv($csvFh, 2048)) {
-                $uuidStack[$line[1]] = $line[2];
+                $this->uuidStack[$line[1]] = $line[2];
             }
             fclose($csvFh);
         }
@@ -50,8 +51,8 @@ class BulletinShell extends AppShell {
                 if (substr($link['title'], -4) === '.pdf') {
                     $link['title'] = substr($link['title'], 0, -4);
                 }
-                if (isset($uuidStack[$url])) {
-                    $uuid = $uuidStack[$url];
+                if (isset($this->uuidStack[$url])) {
+                    $uuid = $this->uuidStack[$url];
                 } else {
                     $uuid = String::uuid();
                 }
@@ -97,12 +98,12 @@ class BulletinShell extends AppShell {
         }
         $csvPath = __DIR__ . '/data';
         $pdfPath = $csvPath . '/pdf_103';
-        $uuidStack = array();
+        $this->uuidStack = array();
         $csvFile = $csvPath . '/bulletin_103_counties.csv';
         if (file_exists($csvFile)) {
             $csvFh = fopen($csvFile, 'r');
             while ($line = fgetcsv($csvFh, 2048)) {
-                $uuidStack[$line[1]] = $line[2];
+                $this->uuidStack[$line[1]] = $line[2];
             }
             fclose($csvFh);
         }
@@ -125,8 +126,8 @@ class BulletinShell extends AppShell {
                         $link = $baseUrl . $link;
                     }
                     $title = substr($parts, strpos($parts, '>') + 1);
-                    if (isset($uuidStack[$link])) {
-                        $uuid = $uuidStack[$link];
+                    if (isset($this->uuidStack[$link])) {
+                        $uuid = $this->uuidStack[$link];
                     } else {
                         $uuid = String::uuid();
                     }
@@ -160,32 +161,36 @@ class BulletinShell extends AppShell {
             file_put_contents($baseCache, file_get_contents($baseUrl));
         }
         $baseContent = file_get_contents($baseCache);
-        $this->treeLinks($baseContent, '', $baseUrl);
         $csvPath = __DIR__ . '/data';
-        $pdfPath = $csvPath . '/pdf_103';
-        if (!file_exists($pdfPath)) {
-            mkdir($pdfPath, 0777, true);
-        }
-        $uuidStack = array();
         $csvFile = $csvPath . '/bulletin_103.csv';
         if (file_exists($csvFile)) {
             $csvFh = fopen($csvFile, 'r');
             while ($line = fgetcsv($csvFh, 2048)) {
-                $uuidStack[$line[1]] = $line[2];
+                $this->uuidStack[$line[1]] = $line[2];
             }
             fclose($csvFh);
         }
+        $pdfPath = $csvPath . '/pdf_103';
+        if (!file_exists($pdfPath)) {
+            mkdir($pdfPath, 0777, true);
+        }
+        $this->treeLinks($baseContent, '', $baseUrl);
         $csvFh = fopen($csvFile, 'w');
         foreach ($this->links AS $url => $link) {
             if ($link['isPdf'] === true) {
-                if (isset($uuidStack[$url])) {
-                    $uuid = $uuidStack[$url];
+                if (isset($this->uuidStack[$url])) {
+                    $uuid = $this->uuidStack[$url];
                 } else {
                     $uuid = String::uuid();
                 }
                 $pdfFile = "{$pdfPath}/{$uuid}.pdf";
                 if (!file_exists($pdfFile)) {
-                    copy(TMP . '103/' . md5($url), $pdfFile);
+                    $tmpFile = TMP . '103/' . md5($url);
+                    if(file_exists($tmpFile)) {
+                        copy(TMP . '103/' . md5($url), $pdfFile);
+                    } else {
+                        file_put_contents($pdfFile, file_get_contents($url));
+                    }
                 }
                 fputcsv($csvFh, array(
                     $link['title'],
@@ -586,6 +591,22 @@ class BulletinShell extends AppShell {
                         $part[0] = '鳥松區坔埔里.pdf';
                         $part[1] = '鳥松區坔埔里';
                         break;
+                    case '東港鎮下?里、大潭里、興和里、大鵬里、船頭里、共和里里長.pdf':
+                        $part[0] = '東港鎮下廍里、大潭里、興和里、大鵬里、船頭里、共和里里長.pdf';
+                        $part[1] = '東港鎮下廍里、大潭里、興和里、大鵬里、船頭里、共和里里長';
+                        break;
+                    case '萬丹鄉崙頂村、?北村、?南村、後村村、灣內村村長.pdf':
+                        $part[0] = '萬丹鄉崙頂村、厦北村、?南村、後村村、灣內村村長.pdf';
+                        $part[1] = '萬丹鄉崙頂村、厦北村、?南村、後村村、灣內村村長';
+                        break;
+                    case '里港鄉中和村、土庫村、瀰力村、三?村村長.pdf':
+                        $part[0] = '里港鄉中和村、土庫村、瀰力村、三廍村村長.pdf';
+                        $part[1] = '里港鄉中和村、土庫村、瀰力村、三廍村村長';
+                        break;
+                    case '24滿州鄉滿州村、里德村、?林村、永靖村、港口村、長樂村、九棚村、港仔村村長.pdf':
+                        $part[0] = '24滿州鄉滿州村、里德村、响林村、永靖村、港口村、長樂村、九棚村、港仔村村長.pdf';
+                        $part[1] = '24滿州鄉滿州村、里德村、响林村、永靖村、港口村、長樂村、九棚村、港仔村村長';
+                        break;
                     default:
                         echo "{$part[0]}\n\n";
                         exit();
@@ -616,14 +637,16 @@ class BulletinShell extends AppShell {
         }
         if (!empty($linksFound)) {
             foreach ($linksFound AS $link) {
-                $cCache = TMP . '103/' . md5($link['url']);
-                if (!file_exists($cCache)) {
-                    $cap = urldecode($link['url']);
-                    echo "downloading {$cap}\n";
-                    file_put_contents($cCache, $this->s->get($link['url']));
+                if (!isset($this->uuidStack[$url])) {
+                    $cCache = TMP . '103/' . md5($link['url']);
+                    if (!file_exists($cCache)) {
+                        $cap = urldecode($link['url']);
+                        echo "downloading {$cap}\n";
+                        file_put_contents($cCache, $this->s->get($link['url']));
+                    }
+                    $cContent = file_get_contents($cCache);
+                    $this->treeLinks($cContent, "{$link['title']} > ", $link['url']);
                 }
-                $cContent = file_get_contents($cCache);
-                $this->treeLinks($cContent, "{$link['title']} > ", $link['url']);
             }
         }
     }
