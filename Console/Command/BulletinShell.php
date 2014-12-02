@@ -607,6 +607,26 @@ class BulletinShell extends AppShell {
                         $part[0] = '24滿州鄉滿州村、里德村、响林村、永靖村、港口村、長樂村、九棚村、港仔村村長.pdf';
                         $part[1] = '24滿州鄉滿州村、里德村、响林村、永靖村、港口村、長樂村、九棚村、港仔村村長';
                         break;
+                    case '佳里區頂?里里長.pdf':
+                        $part[0] = '佳里區頂廍里里長.pdf';
+                        $part[1] = '佳里區頂廍里里長';
+                        break;
+                    case '安南區?田里里長.pdf':
+                        $part[0] = '安南區塩田里里長.pdf';
+                        $part[1] = '安南區塩田里里長';
+                        break;
+                    case '山上區-玉?里里長.pdf':
+                        $part[0] = '山上區-玉峯里里長.pdf';
+                        $part[1] = '山上區-玉峯里里長';
+                        break;
+                    case '永康區?洲里里長.pdf':
+                        $part[0] = '永康區塩洲里里長.pdf';
+                        $part[1] = '永康區塩洲里里長';
+                        break;
+                    case '永康區?行里里長.pdf':
+                        $part[0] = '永康區塩行里里長.pdf';
+                        $part[1] = '永康區塩行里里長';
+                        break;
                     default:
                         echo "{$part[0]}\n\n";
                         exit();
