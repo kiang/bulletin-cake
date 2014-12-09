@@ -8,7 +8,82 @@ class ExtractShell extends AppShell {
 
     public function main() {
         //$this->pdf();
-        $this->pdf103();
+        $this->block_txt103();
+    }
+
+    public function block_txt103() {
+        $csvPath = __DIR__ . '/data';
+        $blockPath = $csvPath . '/block_103';
+        $txtPath = $csvPath . '/txt_103';
+        $canvas = imagecreatefrompng(TMP . 'txt_103/54773ba1-fa1c-4a69-9c14-1915cf91e152/bg1.png');
+        $height = imagesy($canvas);
+        $fh = fopen($blockPath . '/54773ba1-fa1c-4a69-9c14-1915cf91e152_bg1', 'r');
+        $blocks = array();
+        while ($line = fgetcsv($fh, 2048, ' ')) {
+            $line[2] += $line[0];
+            $line[3] += $line[1];
+            $blocks[] = $line;
+        }
+        fclose($fh);
+        $blockTxt = array();
+        $fh = fopen($txtPath . '/54773ba1-fa1c-4a69-9c14-1915cf91e152.csv', 'r');
+        fgets($fh, 512);
+        $color = imagecolorallocate($canvas, 0, 0, 0);
+        while ($line = fgetcsv($fh, 2048)) {
+            if ($line[0] == 1) {
+                print_r($line);
+                $line[1] = $line[1] * 4354 / 2177;
+                $line[2] = $line[2] * 2993 / 1497;
+                print_r($line); continue;
+                imagefilledellipse($canvas, $line[1], $line[2], 20, 20, $color);
+                foreach ($blocks AS $block) {
+                    if ($line[1] > $block[0] && $line[1] < $block[2] && $line[2] > $block[1] && $line[2] < $block[3]) {
+                        $blockId = implode(' ', $block);
+                        if (!isset($blockTxt[$blockId])) {
+                            $blockTxt[$blockId] = array();
+                        }
+                        if(!isset($blockTxt[$blockId][$line[1]])) {
+                            $blockTxt[$blockId][$line[1]] = array();
+                        }
+                        $blockTxt[$blockId][$line[1]][] = $line[3];
+                    }
+                }
+            }
+        }
+        fclose($fh);
+        print_r($blockTxt);
+        imagepng($canvas, TMP . 'test.png');
+        //54773ba1-fa1c-4a69-9c14-1915cf91e152
+    }
+
+    public function block103() {
+        $csvPath = __DIR__ . '/data';
+        $resultPath = $csvPath . '/block_103';
+        $csvFh = fopen($csvPath . '/bulletin_103.csv', 'r');
+        $htmlPath = TMP . 'txt_103';
+        if (!file_exists($htmlPath)) {
+            mkdir($htmlPath, 0777, true);
+        }
+        if (!file_exists($resultPath)) {
+            mkdir($resultPath, 0777, true);
+        }
+        while ($line = fgetcsv($csvFh, 2048)) {
+            $htmlFile = "{$htmlPath}/{$line[2]}/{$line[2]}.html";
+            if (file_exists($htmlFile)) {
+                $content = file_get_contents($htmlFile);
+                $pos = strpos($content, 'src="bg');
+                while (false !== $pos) {
+                    $pos = strpos($content, '"', $pos) + 1;
+                    $posEnd = strpos($content, '"', $pos);
+                    $bgImage = substr($content, $pos, $posEnd - $pos);
+                    $bgImagePath = "{$htmlPath}/{$line[2]}/" . $bgImage;
+                    if (file_exists($bgImagePath)) {
+                        exec("/home/kiang/bin/locate_block < {$bgImagePath} > {$resultPath}/{$line[2]}_" . substr($bgImage, 0, strpos($bgImage, '.')));
+                    }
+                    $pos = strpos($content, 'src="bg', $posEnd);
+                }
+            }
+        }
     }
 
     public function pdf() {
