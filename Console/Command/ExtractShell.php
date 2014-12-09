@@ -28,31 +28,27 @@ class ExtractShell extends AppShell {
         $blockTxt = array();
         $fh = fopen($txtPath . '/54773ba1-fa1c-4a69-9c14-1915cf91e152.csv', 'r');
         fgets($fh, 512);
-        $color = imagecolorallocate($canvas, 0, 0, 0);
+        //$color = imagecolorallocate($canvas, 0, 0, 0);
         while ($line = fgetcsv($fh, 2048)) {
             if ($line[0] == 1) {
-                print_r($line);
-                $line[1] = $line[1] * 4354 / 2177;
-                $line[2] = $line[2] * 2993 / 1497;
-                print_r($line); continue;
-                imagefilledellipse($canvas, $line[1], $line[2], 20, 20, $color);
+                //imagefilledellipse($canvas, $line[1], $line[2], 20, 20, $color);
                 foreach ($blocks AS $block) {
                     if ($line[1] > $block[0] && $line[1] < $block[2] && $line[2] > $block[1] && $line[2] < $block[3]) {
                         $blockId = implode(' ', $block);
                         if (!isset($blockTxt[$blockId])) {
                             $blockTxt[$blockId] = array();
                         }
-                        if(!isset($blockTxt[$blockId][$line[1]])) {
-                            $blockTxt[$blockId][$line[1]] = array();
+                        if (!isset($blockTxt[$blockId][$line[1]])) {
+                            //$blockTxt[$blockId][$line[1]] = array();
                         }
-                        $blockTxt[$blockId][$line[1]][] = $line[3];
+                        $blockTxt[$blockId][] = $line[3];
                     }
                 }
             }
         }
         fclose($fh);
         print_r($blockTxt);
-        imagepng($canvas, TMP . 'test.png');
+        //imagepng($canvas, TMP . 'test.png');
         //54773ba1-fa1c-4a69-9c14-1915cf91e152
     }
 
@@ -200,7 +196,6 @@ class ExtractShell extends AppShell {
                 $ref = array();
                 if (file_exists($htmlPath . '/' . $line[2] . '/' . $line[2] . '.css')) {
                     $cssFh = fopen($htmlPath . '/' . $line[2] . '/' . $line[2] . '.css', 'r');
-
                     while ($cssLine = fgets($cssFh, 1024)) {
                         $cssLine = substr($cssLine, 1, -5);
                         if (false !== strpos($cssLine, '{bottom:')) {
@@ -208,6 +203,12 @@ class ExtractShell extends AppShell {
                             $ref[$item[0]] = $item[1];
                         } elseif (false !== strpos($cssLine, '{left:')) {
                             $item = explode('{left:', $cssLine);
+                            $ref[$item[0]] = $item[1];
+                        } elseif (false !== strpos($cssLine, '{width:')) {
+                            $item = explode('{width:', $cssLine);
+                            $ref[$item[0]] = $item[1];
+                        } elseif (false !== strpos($cssLine, '{height:')) {
+                            $item = explode('{height:', $cssLine);
                             $ref[$item[0]] = $item[1];
                         }
                     }
@@ -225,6 +226,20 @@ class ExtractShell extends AppShell {
                 while (false !== $pos) {
                     $pageNoPos = strpos($htmlContent, 'data-page-no="', $pos) + 14;
                     $pageNo = substr($htmlContent, $pageNoPos, strpos($htmlContent, '"', $pageNoPos) - $pageNoPos);
+                    $imgPos = strpos($htmlContent, '<img class');
+                    $imgPos = strpos($htmlContent, ' w', $imgPos);
+                    $bgWidth = $ref[substr($htmlContent, $imgPos + 1, strpos($htmlContent, ' ', $imgPos + 1) - $imgPos - 1)];
+                    $imgPos = strpos($htmlContent, ' h', $imgPos);
+                    $bgHeight = $ref[substr($htmlContent, $imgPos + 1, strpos($htmlContent, '"', $imgPos + 1) - $imgPos - 1)];
+                    if (file_exists("{$htmlPath}/{$line[2]}/bg{$pageNo}.png")) {
+                        $imgSize = getimagesize("{$htmlPath}/{$line[2]}/bg{$pageNo}.png");
+                    } else {
+                        $imgSize = array(
+                            0 => 0,
+                            1 => 0,
+                        );
+                    }
+
                     $textPos = $pos;
                     $posEnd = strpos($htmlContent, '<div id="pf', $pos + 1);
                     if (false === $posEnd) {
@@ -240,8 +255,8 @@ class ExtractShell extends AppShell {
                         $textPosEnd = strpos($htmlContent, '</div>', $textPos);
                         fputcsv($rFh, array(
                             $pageNo,
-                            $ref[$x],
-                            $ref[$y],
+                            $ref[$x] * $imgSize[0] / $bgWidth,
+                            $imgSize[1] - ($ref[$y] * $imgSize[1] / $bgHeight),
                             trim(strip_tags(substr($htmlContent, $textPos, $textPosEnd - $textPos))),
                         ));
 
