@@ -8,7 +8,7 @@ class ExtractShell extends AppShell {
 
     public function main() {
         //$this->pdf();
-        $this->block_txt103();
+        $this->block103();
     }
 
     public function block_txt103() {
@@ -74,7 +74,7 @@ class ExtractShell extends AppShell {
                     $bgImage = substr($content, $pos, $posEnd - $pos);
                     $bgImagePath = "{$htmlPath}/{$line[2]}/" . $bgImage;
                     if (file_exists($bgImagePath)) {
-                        exec("/home/kiang/bin/locate_block < {$bgImagePath} > {$resultPath}/{$line[2]}_" . substr($bgImage, 0, strpos($bgImage, '.')));
+                        exec("/home/kiang/bin/locate_block < {$bgImagePath}  > {$resultPath}/{$line[2]}_" . substr($bgImage, 0, strpos($bgImage, '.')));
                     }
                     $pos = strpos($content, 'src="bg', $posEnd);
                 }
