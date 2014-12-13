@@ -8,48 +8,60 @@ class ExtractShell extends AppShell {
 
     public function main() {
         //$this->pdf();
-        $this->block103();
+        $this->block_txt103();
     }
 
     public function block_txt103() {
         $csvPath = __DIR__ . '/data';
         $blockPath = $csvPath . '/block_103';
         $txtPath = $csvPath . '/txt_103';
-        $canvas = imagecreatefrompng(TMP . 'txt_103/54773ba1-fa1c-4a69-9c14-1915cf91e152/bg1.png');
-        $height = imagesy($canvas);
-        $fh = fopen($blockPath . '/54773ba1-fa1c-4a69-9c14-1915cf91e152_bg1', 'r');
-        $blocks = array();
-        while ($line = fgetcsv($fh, 2048, ' ')) {
-            $line[2] += $line[0];
-            $line[3] += $line[1];
-            $blocks[] = $line;
+        $resultPath = $csvPath . '/block_txt_103';
+        $csvFh = fopen($csvPath . '/bulletin_103.csv', 'r');
+        if (!file_exists($resultPath)) {
+            mkdir($resultPath, 0777, true);
         }
-        fclose($fh);
-        $blockTxt = array();
-        $fh = fopen($txtPath . '/54773ba1-fa1c-4a69-9c14-1915cf91e152.csv', 'r');
-        fgets($fh, 512);
-        //$color = imagecolorallocate($canvas, 0, 0, 0);
-        while ($line = fgetcsv($fh, 2048)) {
-            if ($line[0] == 1) {
-                //imagefilledellipse($canvas, $line[1], $line[2], 20, 20, $color);
-                foreach ($blocks AS $block) {
-                    if ($line[1] > $block[0] && $line[1] < $block[2] && $line[2] > $block[1] && $line[2] < $block[3]) {
-                        $blockId = implode(' ', $block);
-                        if (!isset($blockTxt[$blockId])) {
-                            $blockTxt[$blockId] = array();
-                        }
-                        if (!isset($blockTxt[$blockId][$line[1]])) {
-                            //$blockTxt[$blockId][$line[1]] = array();
-                        }
-                        $blockTxt[$blockId][] = $line[3];
+        while ($line = fgetcsv($csvFh, 2048)) {
+            $txtFile = "{$txtPath}/{$line[2]}.csv";
+            if (file_exists($txtFile) && filesize($txtFile) > 0) {
+                echo "processing {$line[2]}\n";
+                $fh = fopen($txtFile, 'r');
+                fgets($fh, 512);
+                $pageText = array();
+                while ($txtLine = fgetcsv($fh, 2048)) {
+                    if (!isset($pageText[$txtLine[0]])) {
+                        $pageText[$txtLine[0]] = array();
                     }
+                    $pageText[$txtLine[0]][] = $txtLine;
+                }
+                fclose($fh);
+                if (!empty($pageText)) {
+                    $blockTxt = array();
+                    foreach (glob("{$blockPath}/{$line[2]}*") AS $bgFile) {
+                        if (filesize($bgFile) > 0) {
+                            $bgPos = strrpos($bgFile, 'bg') + 2;
+                            $pageNo = substr($bgFile, $bgPos);
+                            if (isset($pageText[$pageNo])) {
+                                $blockTxt[$pageNo] = array();
+                                $fh = fopen($bgFile, 'r');
+                                while ($block = fgetcsv($fh, 2048, ' ')) {
+                                    $block[2] += $block[0];
+                                    $block[3] += $block[1];
+                                    $blockId = implode(' ', $block);
+                                    $blockTxt[$pageNo][$blockId] = array();
+                                    foreach ($pageText[$pageNo] AS $txt) {
+                                        if ($txt[1] > $block[0] && $txt[1] < $block[2] && $txt[2] > $block[1] && $txt[2] < $block[3]) {
+                                            $blockTxt[$pageNo][$blockId][] = $txt[3];
+                                        }
+                                    }
+                                }
+                                fclose($fh);
+                            }
+                        }
+                    };
+                    file_put_contents("{$resultPath}/{$line[2]}.json", json_encode($blockTxt, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
                 }
             }
         }
-        fclose($fh);
-        print_r($blockTxt);
-        //imagepng($canvas, TMP . 'test.png');
-        //54773ba1-fa1c-4a69-9c14-1915cf91e152
     }
 
     public function block103() {
